@@ -17,7 +17,13 @@ const accounts = PRIVATE_KEY && PRIVATE_KEY !== "your_private_key_here"
   : [];
 
 const hardhatAccounts = accounts.length
-  ? [{ privateKey: accounts[0], balance: "10000000000000000000000" }]
+  ? [
+      { privateKey: accounts[0], balance: "10000000000000000000000" }, // User's account
+      ...Array.from({ length: 19 }, (_, i) => ({
+        privateKey: `0x${(i + 1).toString().padStart(64, '0')}`, // Generate deterministic keys for testing
+        balance: "10000000000000000000000"
+      }))
+    ]
   : {
       count: 20,
       accountsBalance: "10000000000000000000000", // 10,000 ETH

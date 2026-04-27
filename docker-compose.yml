@@ -14,7 +14,7 @@ services:
     networks:
       - vault-network
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8545 || exit 1"]
+      test: ["CMD-SHELL", "curl -X POST -H 'Content-Type: application/json' -d '{\"jsonrpc\":\"2.0\",\"method\":\"eth_blockNumber\",\"params\":[],\"id\":1}' http://localhost:8545 || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3

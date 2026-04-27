@@ -10,9 +10,9 @@ async function main() {
   const fs = require("fs");
   let deploymentInfo;
   try {
-    deploymentInfo = JSON.parse(fs.readFileSync("deployment-info.json", "utf8"));
+    deploymentInfo = JSON.parse(fs.readFileSync("deployment-localhost.json", "utf8"));
   } catch (error) {
-    console.error("Could not read deployment-info.json. Please deploy first.");
+    console.error("Could not read deployment-localhost.json. Please deploy first.");
     process.exit(1);
   }
 

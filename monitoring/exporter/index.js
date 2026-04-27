@@ -103,7 +103,14 @@ let totalRewards = 0n;
 // Initialize blockchain connection
 async function initializeBlockchain() {
   try {
-    provider = new ethers.JsonRpcProvider(RPC_URL);
+    if (vaultContract) {
+      vaultContract.removeAllListeners();
+    }
+
+    provider = new ethers.JsonRpcProvider({
+      url: RPC_URL,
+      fetchOptions: { keepalive: true }
+    });
     vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, provider);
     
     console.log('🔗 Connected to blockchain:', RPC_URL);
@@ -111,7 +118,7 @@ async function initializeBlockchain() {
     
     // Test connection
     const network = await provider.getNetwork();
-    console.log('🌐 Network:', network.name, 'Chain ID:', network.chainId.toString());
+    console.log('🌐 Network:', network.name || 'unknown', 'Chain ID:', network.chainId.toString());
     
     // Set up event listeners
     setupEventListeners();
@@ -135,9 +142,27 @@ async function initializeBlockchain() {
   }
 }
 
+async function reconnectBlockchain() {
+  console.log('🔄 Reconnecting to blockchain RPC...');
+
+  if (vaultContract) {
+    vaultContract.removeAllListeners();
+  }
+
+  provider = null;
+  vaultContract = null;
+  await initializeBlockchain();
+}
+
 // Set up event listeners for real-time metrics
 function setupEventListeners() {
   try {
+    if (!vaultContract) {
+      throw new Error('Vault contract is not initialized');
+    }
+
+    vaultContract.removeAllListeners();
+
     // Listen for deposit events
     vaultContract.on('Deposited', (user, amount, timestamp, event) => {
       console.log(`📥 Deposit: ${user} deposited ${ethers.formatEther(amount)} ETH`);
@@ -230,6 +255,12 @@ async function collectMetrics() {
     
   } catch (error) {
     console.error('❌ Error collecting metrics:', error.message);
+
+    const retryable = /ECONNRESET|socket hang up|connection closed|Unexpected end of JSON input/i.test(error.message);
+    if (retryable) {
+      console.warn('⚠️  RPC connection was reset, reconnecting...');
+      await reconnectBlockchain();
+    }
     
     // Increment failed transaction counter
     transactionCount.labels('system', 'failed').inc();

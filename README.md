@@ -43,7 +43,7 @@ A comprehensive DeFi vault system with UUPS upgradeable smart contracts, real-ti
 
 ### 1. Clone & Setup
 ```bash
-git clone https://github.com/GermainGihozo/eth-vault-monitoring-stack.git
+git clone https://github.com/chancemaniriho/etherium-vault-monitoring.git
 cd eth-vault-monitoring-stack
 ```
 
